@@ -50,9 +50,7 @@ const inventory = [
 //console.log(`You have now ${tasks.length} recipes, which are ${tasks.recipeName}`)
 
 
-let tasks = ["waffle", "crepes", "cookies"];
-let done = [false, false, false];
-let tasksNotDone = tasks
+
 /*
 rl.setPrompt("Which recipe would you like to mark as done? Use the index\n");
 rl.prompt();
@@ -77,7 +75,6 @@ for (i=0; i<tasksDone-1; i++) {
     }
 }
 */
-let choice;
 //console.log(`At the moment, the recipes that are `)
 
 
@@ -125,63 +122,149 @@ rl.on('line', (num) => {
 
 
 //EXEMPLE 
-//let close = false
-//while (close === false) {
+
+/*
+let shouldContinue = true;
 
 
+function askQuestion() {
 rl.question("Welcome to your recipe manager! What do you want to do today? \n 1. to see all your recipes \n 2. to add a new recipe \n 3. to delete a recipe \n 4. to mark a recipe as done \n 5. to Exit the recipe manager \n", (choice) => {
+        switch (choice.trim()) {
+      case "start":
+        console.log("Starting...");
+        break;
+      case "stop":
+        console.log("Stopping...");
+        shouldContinue = false; // set the boolean variable to false to stop the loop
+        rl.close(); // close the readline interface to exit the program
+        break;
+      default:
+        console.log("Unknown command.");
+        break;
+    }
+
+    if (shouldContinue) {
+      askQuestion(); // ask the question again if we should continue
+    } else {
+      rl.close(); // close the readline interface to exit the program
+    }
+  });
+}
+
+askQuestion();
+
+*/
+
+
+let tasks = ["waffle", "crepes", "cookies"];
+let done = [false, false, false];
+let recipeDone
+
+const showDone = () => {
+    recipeDone = []
+    for (i=0; i<tasks.length; i++) {
+        if (done[i] == false) {
+            recipeDone.push(tasks[i] + ": not done yet")
+        } else {
+            recipeDone.push(tasks[i] + ": already done")
+        }
+    }
+    return recipeDone
+}
+
+
+let choice;
+
+let again = true
+console.log("Welcome to your recipe manager! ")
+
+
+
+
+const terminal = () => {
+rl.question("\nWhat do you want to do? \n 1. to see all your recipes \n 2. to add a new recipe \n 3. to delete a recipe \n 4. to mark a recipe as done \n 5. to Exit the recipe manager \n", (choice) => {
     choice = parseInt(choice)
-    console.log('Your choice is: ' + optionChoice(choice))
+    console.log('\nYour choice is: ' + optionChoice(choice))
         switch (choice) {
             case 1:
-                console.log(`You have now ${tasks.length} recipes, which are ${tasks}`);
+                console.log(`You have ${tasks.length} recipes, which are ${tasks}\n`);
+                console.log(showDone())
+                terminal()
                 break;
             case 2:
-                rl.setPrompt("Which recipe would you like to add?");
+                rl.setPrompt("Which recipe would you like to add?\n");
                 rl.prompt();
+                rl.removeAllListeners('line'); // remove the previous listener
                 rl.on('line', (addRecipe) => {
                     tasks.push(addRecipe)
+                    done.push(false)
                     console.log(`you have added the ${addRecipe} recipe, you now have ${tasks.length} recipes, which are ${tasks}`);
-                    rl.close();
-                    });
+                    console.log(showDone())
+                terminal()
+                });
                 break;
+
             case 3:
-                console.log(`you now have ${tasks.length} recipes, which are ${tasks}`)
-                rl.setPrompt(`Which recipe would you like to delete?`);
+                console.log(`At the moment, you have ${tasks.length} recipes, which are ${tasks} \n`)
+                console.log(showDone())
+                rl.setPrompt(`Which recipe would you like to delete?\n`);
                 rl.prompt();
+                rl.removeAllListeners('line'); // remove the previous listener
                 rl.on('line', (deleteRecipe) => { 
                     if (parseInt(deleteRecipe) < (tasks.length+1)) {
-                        tasks.splice(deleteRecipe-1, 1)
-                        console.log(`you have deleted the ${deleteRecipe}th recipe from your data, you now have ${tasks.length} recipes, which are ${tasks}`);
+                        console.log(`\nYou have deleted the ${deleteRecipe}th recipe from your data, which is ${tasks[deleteRecipe-1]}.`)
+                        tasks.splice(deleteRecipe-1, 1);
+                        done.splice(deleteRecipe-1, 1);
+                        console.log(`\nYou now have ${tasks.length} recipes, which are ${tasks}`);
+                        console.log(showDone())
                     } else {
                         rl.setPrompt(`Your answer isn't valid, please enter a number between 1 and ${tasks.length}`);
                         rl.prompt();
-                }})
+                    }
+                terminal()
+                })
                 break;
             case 4: 
-            rl.setPrompt("Which recipe would you like to mark as done? Use the index\n");
-            rl.prompt();
-            rl.on('line', (markAsDone) => {
-                if (markAsDone<done.length) {
-                    done[markAsDone-1] = true;
-                    console.log(`the recipe ${tasks[markAsDone-1]} has now been marked as done`)
-                } else {
-                    console.log("invalid answer")
-                }});
+                console.log(`At the moment, you have ${tasks.length} recipes, which are ${tasks} \n`)
+                console.log(showDone())
+                rl.setPrompt("Which recipe would you like to mark as done? Use the index\n");
+                rl.prompt();
+                rl.removeAllListeners('line'); // remove the previous listener
+                rl.on('line', (markAsDone) => {
+                    if (markAsDone<=done.length) {
+                        done[markAsDone-1] = true;
+                        console.log(`the recipe ${tasks[markAsDone-1]} has now been marked as done`)
+                        console.log(showDone())
+                    } else {
+                        console.log("invalid answer")
+                    }
+                    terminal()
+                }
+                );
                 break;                
             case 5:
-                rl.setPrompt("You will now leave the recipe manager. Press 'N' to stay, or any other key to proceed")
+                rl.setPrompt("You will now leave the recipe manager. Press 'N' to stay, or any other key to proceed\n")
                 rl.prompt();
+                rl.removeAllListeners('line'); // remove the previous listener
                 rl.on('line', (close) => {
                     if (close == "N") {
+                    terminal(); // call the function again to start over
                     } else { 
-                        close = true
-                        rl.close();
+                    rl.close(); // close the readline interface to exit the program
                     }              
                 })
+                break;
             default:
-                iterations = 10
+                console.log("Invalid answer, please try again")
+                terminal()
+                break;
         }
-})
+})}
 
-//}
+if (again) {
+    terminal(); // ask the question again if we should continue
+  } else {
+    rl.close(); // close the readline interface to exit the program
+  }
+
+
