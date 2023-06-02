@@ -16,10 +16,12 @@ console.log("Welcome to your recipe manager! ")
 
 //FUNCTIONS
 
+//tells which option you choose
 const optionChoice = (choice) => {
     return options[parseInt(choice)-1]
 };
 
+//shows which recipes have been declared as done
 const showDone = () => {
     recipeDone = []
     for (i=0; i<tasks.length; i++) {
@@ -32,11 +34,13 @@ const showDone = () => {
     return recipeDone
 }
 
+//adds a new recipe
 const addfunction = (addRecipe) => {
     tasks.push(addRecipe)
     done.push(false)
 }
 
+//deletes the recipe
 const deletefunction = (deleteRecipe) => {
     if (parseInt(deleteRecipe) < (tasks.length+1)) {
         console.log(`\nYou have deleted the ${deleteRecipe}th recipe from your data, which is ${tasks[deleteRecipe-1]}.`)
@@ -50,6 +54,7 @@ const deletefunction = (deleteRecipe) => {
     }
 }
 
+//change a recipe as "already done"
 const changefunction = (markAsDone) => {
     if (markAsDone<=done.length) {
         done[markAsDone-1] = true;
@@ -60,7 +65,7 @@ const changefunction = (markAsDone) => {
     }
 }
 
-
+//the terminal app
 const terminal = () => {
 rl.question("\nWhat do you want to do? \n 1. to see all your recipes \n 2. to add a new recipe \n 3. to delete a recipe \n 4. to mark a recipe as done \n 5. to Exit the recipe manager \n", (choice) => {
     choice = parseInt(choice)
