@@ -41,7 +41,7 @@ const addfunction = (addRecipe) => {
 }
 
 //deletes the recipe
-const deletefunction = (deleteRecipe) => {
+/*const deletefunction = (deleteRecipe) => {
     if (parseInt(deleteRecipe) < (tasks.length+1)) {
         console.log(`\nYou have deleted the ${deleteRecipe}th recipe from your data, which is ${tasks[deleteRecipe-1]}.`)
         tasks.splice(deleteRecipe-1, 1);
@@ -49,10 +49,75 @@ const deletefunction = (deleteRecipe) => {
         console.log(`\nYou now have ${tasks.length} recipes, which are ${tasks}`);
         console.log(showDone())
     } else {
-        rl.setPrompt(`Your answer isn't valid, please enter a number between 1 and ${tasks.length}`);
+        rl.setPrompt(`Your answer isn't valid, please select an existing recipe or enter a number between 1 and ${tasks.length}`);
         rl.prompt();
     }
-}
+}*/
+
+const deletefunction = (deleteRecipe, tasks, prevQuestion, nextQuestion) => {
+
+    rl.removeAllListeners('line');
+
+    let isValidInput = false;
+
+    if (isNaN(Number(deleteRecipe))) {
+
+        if (tasks.includes(deleteRecipe) === false) {
+
+            console.log(`Your answer isn't valid, please select an existing recipe or enter a number between 1 and ${tasks.length}`);
+            rl.setPrompt("Which recipe would you like to delete? Use the index\n");
+            rl.prompt();
+            rl.on('line', (input) => deletefunction(input, tasks, 'delete', 'delete')); 
+
+            } else {
+
+            console.log(`\nYou have deleted the ${(tasks.findIndex(element => element === deleteRecipe))+1}th recipe from your data, which is ${deleteRecipe}.`)
+            tasks.splice(tasks.findIndex(element => element === deleteRecipe),1)
+            done.splice(tasks.findIndex(element => element === deleteRecipe),1)
+            console.log(`\nYou now have ${tasks.length} recipes, which are ${tasks}`);
+            console.log(showDone());
+            isValidInput = true;
+            rl.on('line', (input) => deletefunction(input, tasks, 'delete', 'terminal')); // set the next question to 'terminal' if input is valid
+            }
+          
+    } else {
+
+        if (Number(deleteRecipe) < (tasks.length+1)) {
+            console.log(`\nYou have deleted the ${deleteRecipe}th recipe from your data, which is ${tasks[deleteRecipe-1]}.`)
+            tasks.splice(deleteRecipe-1, 1);
+            done.splice(deleteRecipe-1, 1);
+            console.log(`\nYou now have ${tasks.length} recipes, which are ${tasks}`);
+            console.log(showDone())
+            isValidInput = true;
+            rl.on('line', (input) => deletefunction(input, tasks, 'delete', 'terminal')); 
+ 
+        } else {
+
+            console.log(`Your answer isn't valid, please select an existing recipe or enter a number between 1 and ${tasks.length}`);
+            rl.setPrompt("Which recipe would you like to delete? Use the index\n"); 
+            rl.prompt(); 
+            rl.on('line', (input) => deletefunction(input, tasks, 'delete', 'delete')); // set the next question to 'terminal' if input is invalid
+        }
+    }
+    
+
+    if (isValidInput) {
+        rl.on('line', (input) => deletefunction(input, tasks, 'delete', 'terminal')); // set the next question to 'terminal' if input is valid
+    } else {
+        if (prevQuestion === 'terminal') {
+            rl.on('line', (input) => deletefunction(input, tasks, 'terminal', 'delete')); // set the next question to 'delete' if input is invalid and previous question was terminal
+        } else {
+            rl.on('line', (input) => deletefunction(input, tasks, 'delete', 'terminal')); // set the next question to 'terminal' if input is invalid and previous question was delete
+        }
+    }
+    
+    if (nextQuestion === 'terminal') { // check next question
+        terminal(); // call terminal function
+    } else if (nextQuestion === 'delete') {
+        rl.setPrompt("Which recipe would you like to delete? Use the index\n"); // set the prompt message
+        rl.prompt(); // display the prompt message
+    }
+};
 
 //change a recipe as "already done"
 const changefunction = (markAsDone) => {
@@ -89,16 +154,17 @@ rl.question("\nWhat do you want to do? \n 1. to see all your recipes \n 2. to ad
                 break;
 
             case 3:
+
                 console.log(`At the moment, you have ${tasks.length} recipes, which are ${tasks} \n`)
                 console.log(showDone())
                 rl.setPrompt(`Which recipe would you like to delete?\n`);
                 rl.prompt();
-                rl.removeAllListeners('line'); // remove the previous listener
-                rl.on('line', (deleteRecipe) => { 
-                    deletefunction(deleteRecipe)
-                terminal()
-                })
+                rl.removeAllListeners('line');
+                rl.on('line', (deleteRecipe) => {
+                    deletefunction(deleteRecipe, tasks, 'delete', 'terminal'); // set the previous question to 'delete' and next question to 'terminal'
+                });
                 break;
+
             case 4: 
                 console.log(`At the moment, you have ${tasks.length} recipes, which are ${tasks} \n`)
                 console.log(showDone())
